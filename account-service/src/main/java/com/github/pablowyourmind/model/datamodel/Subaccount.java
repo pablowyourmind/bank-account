@@ -15,7 +15,7 @@ public class Subaccount {
     private Long id;
 
     private CurrencyType currency;
-    @DecimalMin(value = "0.00", inclusive = true, message = "Nieprawidłowa wartość")
+    @DecimalMin(value = "0.00", inclusive = true, message = "Wartość nie może być ujemna")
     @Digits(integer = 100, fraction = 2, message = "Nieprawidłowa wartość")
     private BigDecimal amount;
 
@@ -39,4 +39,7 @@ public class Subaccount {
         return amount;
     }
 
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
 }

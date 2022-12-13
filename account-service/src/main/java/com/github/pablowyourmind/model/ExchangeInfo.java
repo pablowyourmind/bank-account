@@ -1,27 +1,57 @@
 package com.github.pablowyourmind.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.github.pablowyourmind.model.types.CurrencyType;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import org.hibernate.validator.constraints.pl.PESEL;
+
+import java.math.BigDecimal;
 
 public class ExchangeInfo {
-    private String code;
-    private List<Rate> rates = new ArrayList<>();
+    @PESEL
+    private String pesel;
 
-    public void setRates(List<Rate> rates) {
-        this.rates = rates;
+    @JsonProperty("kwotabazowa")
+    @DecimalMin(value = "0.00", inclusive = true, message = "Wartość nie może być ujemna")
+    @Digits(integer = 100, fraction = 2, message = "Nieprawidłowa wartość")
+    private BigDecimal howMuch;
+
+    @JsonProperty("walutabazowa")
+    private CurrencyType sourceCurrency;
+
+    @JsonProperty("walutadocelowa")
+    private CurrencyType targetCurrency;
+
+    public String getPesel() {
+        return pesel;
     }
 
-    public List<Rate> getRates() {
-        return rates;
+    public void setPesel(String pesel) {
+        this.pesel = pesel;
     }
 
-    public String getCode() {
-        return code;
+    public BigDecimal getHowMuch() {
+        return howMuch;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void setHowMuch(BigDecimal howMuch) {
+        this.howMuch = howMuch;
     }
 
+    public CurrencyType getSourceCurrency() {
+        return sourceCurrency;
+    }
 
+    public void setSourceCurrency(CurrencyType sourceCurrency) {
+        this.sourceCurrency = sourceCurrency;
+    }
+
+    public CurrencyType getTargetCurrency() {
+        return targetCurrency;
+    }
+
+    public void setTargetCurrency(CurrencyType targetCurrency) {
+        this.targetCurrency = targetCurrency;
+    }
 }
