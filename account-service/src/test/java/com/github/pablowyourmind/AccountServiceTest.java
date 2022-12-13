@@ -7,6 +7,7 @@ import com.github.pablowyourmind.model.types.CurrencyType;
 import com.github.pablowyourmind.persistence.MainAccountRepository;
 import com.github.pablowyourmind.service.api.AccountService;
 
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -85,6 +86,68 @@ public class AccountServiceTest {
         assertEquals(2, subaccounts.size());
         assertTrue(subaccounts.stream().anyMatch(sa -> CurrencyType.PLN.equals(sa.getCurrency()) && initialAmount.setScale(2, RoundingMode.HALF_UP).equals(sa.getAmount())));
         assertTrue(subaccounts.stream().anyMatch(sa -> CurrencyType.USD.equals(sa.getCurrency()) && BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP).equals(sa.getAmount())));
+    }
+
+    @Test
+    public void registrationFailedWrongPesel() throws InvalidPeselException, InvalidObjectException {
+        String invalidPesel = "88162354132";
+        mainAccountRepository.deleteAll();
+        RegistrationInfo registrationInfo = new RegistrationInfo();
+        registrationInfo.setName("Test");
+        registrationInfo.setSurname("Test");
+        BigDecimal initialAmount = BigDecimal.valueOf(500);
+        registrationInfo.setInitialAmount(initialAmount);
+        registrationInfo.setPesel(invalidPesel);
+        assertThrows(InvalidPeselException.class, () -> accountService.validateAndPersistMainAccount(registrationInfo));
+    }
+
+    @Test
+    public void registrationFailedDuplicatedAccount() throws InvalidPeselException, InvalidObjectException {
+        mainAccountRepository.deleteAll();
+        RegistrationInfo registrationInfo = new RegistrationInfo();
+        registrationInfo.setName("Test");
+        registrationInfo.setSurname("Test");
+        BigDecimal initialAmount = BigDecimal.valueOf(500);
+        registrationInfo.setInitialAmount(initialAmount);
+        registrationInfo.setPesel(CORRECT_PESEL);
+        assertDoesNotThrow(() -> accountService.validateAndPersistMainAccount(registrationInfo));
+        assertThrows(InvalidObjectException.class, () -> accountService.validateAndPersistMainAccount(registrationInfo));
+    }
+
+    @Test
+    public void registrationFailedInvalidName() throws InvalidPeselException, InvalidObjectException {
+        mainAccountRepository.deleteAll();
+        RegistrationInfo registrationInfo = new RegistrationInfo();
+        registrationInfo.setName("");
+        registrationInfo.setSurname("Test");
+        BigDecimal initialAmount = BigDecimal.valueOf(500);
+        registrationInfo.setInitialAmount(initialAmount);
+        registrationInfo.setPesel(CORRECT_PESEL);
+        assertThrows(Exception.class, () -> accountService.validateAndPersistMainAccount(registrationInfo));
+    }
+
+    @Test
+    public void registrationFailedInvalidSurname() throws InvalidPeselException, InvalidObjectException {
+        mainAccountRepository.deleteAll();
+        RegistrationInfo registrationInfo = new RegistrationInfo();
+        registrationInfo.setName("Test");
+        registrationInfo.setSurname("");
+        BigDecimal initialAmount = BigDecimal.valueOf(500);
+        registrationInfo.setInitialAmount(initialAmount);
+        registrationInfo.setPesel(CORRECT_PESEL);
+        assertThrows(Exception.class, () -> accountService.validateAndPersistMainAccount(registrationInfo));
+    }
+
+    @Test
+    public void registrationFailedInvalidAmount() throws InvalidPeselException, InvalidObjectException {
+        mainAccountRepository.deleteAll();
+        RegistrationInfo registrationInfo = new RegistrationInfo();
+        registrationInfo.setName("Test");
+        registrationInfo.setSurname("Test");
+        BigDecimal initialAmount = BigDecimal.valueOf(-500);
+        registrationInfo.setInitialAmount(initialAmount);
+        registrationInfo.setPesel(CORRECT_PESEL);
+        assertThrows(Exception.class, () -> accountService.validateAndPersistMainAccount(registrationInfo));
     }
 
 
