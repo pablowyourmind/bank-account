@@ -71,6 +71,7 @@ public class AccountServiceTest {
 
     @Test
     public void registrationSuccesful() throws InvalidPeselException, InvalidObjectException {
+        mainAccountRepository.deleteAll();
         RegistrationInfo registrationInfo = new RegistrationInfo();
         registrationInfo.setName("Test");
         registrationInfo.setSurname("Test");
@@ -82,8 +83,8 @@ public class AccountServiceTest {
         assertTrue(mainAccount.isPresent());
         List<Subaccount> subaccounts = mainAccount.get().getSubaccounts();
         assertEquals(2, subaccounts.size());
-        assertTrue(subaccounts.stream().anyMatch(sa -> CurrencyType.PLN.equals(sa.getCurrency()) && initialAmount.equals(sa.getAmount())));
-        assertTrue(subaccounts.stream().anyMatch(sa -> CurrencyType.USD.equals(sa.getCurrency()) && BigDecimal.ZERO.equals(sa.getAmount())));
+        assertTrue(subaccounts.stream().anyMatch(sa -> CurrencyType.PLN.equals(sa.getCurrency()) && initialAmount.setScale(2, RoundingMode.HALF_UP).equals(sa.getAmount())));
+        assertTrue(subaccounts.stream().anyMatch(sa -> CurrencyType.USD.equals(sa.getCurrency()) && BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP).equals(sa.getAmount())));
     }
 
 
