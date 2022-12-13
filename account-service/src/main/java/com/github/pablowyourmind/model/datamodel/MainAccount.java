@@ -22,7 +22,7 @@ public class MainAccount {
     @Size(max = 100, message = "Zbyt długie nazwisko")
     private String lastName;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "pesel")
     private List<Subaccount> subaccounts = new ArrayList<>();
 
