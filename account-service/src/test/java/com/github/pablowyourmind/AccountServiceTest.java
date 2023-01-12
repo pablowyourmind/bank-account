@@ -7,7 +7,6 @@ import com.github.pablowyourmind.model.types.CurrencyType;
 import com.github.pablowyourmind.persistence.MainAccountRepository;
 import com.github.pablowyourmind.service.api.AccountService;
 
-import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -79,6 +78,8 @@ public class AccountServiceTest {
         BigDecimal initialAmount = BigDecimal.valueOf(500);
         registrationInfo.setInitialAmount(initialAmount);
         registrationInfo.setPesel(CORRECT_PESEL);
+        registrationInfo.setFirstSubaccountCurrency(CurrencyType.PLN.name());
+        registrationInfo.setSecondSubaccountCurrency(CurrencyType.USD.name());
         assertDoesNotThrow(() -> accountService.validateAndPersistMainAccount(registrationInfo));
         Optional<MainAccount> mainAccount = mainAccountRepository.findById(CORRECT_PESEL);
         assertTrue(mainAccount.isPresent());
@@ -98,6 +99,8 @@ public class AccountServiceTest {
         BigDecimal initialAmount = BigDecimal.valueOf(500);
         registrationInfo.setInitialAmount(initialAmount);
         registrationInfo.setPesel(invalidPesel);
+        registrationInfo.setFirstSubaccountCurrency(CurrencyType.USD.name());
+        registrationInfo.setSecondSubaccountCurrency(CurrencyType.PLN.name());
         assertThrows(InvalidPeselException.class, () -> accountService.validateAndPersistMainAccount(registrationInfo));
     }
 
@@ -110,6 +113,8 @@ public class AccountServiceTest {
         BigDecimal initialAmount = BigDecimal.valueOf(500);
         registrationInfo.setInitialAmount(initialAmount);
         registrationInfo.setPesel(CORRECT_PESEL);
+        registrationInfo.setFirstSubaccountCurrency(CurrencyType.PLN.name());
+        registrationInfo.setSecondSubaccountCurrency(CurrencyType.USD.name());
         assertDoesNotThrow(() -> accountService.validateAndPersistMainAccount(registrationInfo));
         assertThrows(InvalidObjectException.class, () -> accountService.validateAndPersistMainAccount(registrationInfo));
     }

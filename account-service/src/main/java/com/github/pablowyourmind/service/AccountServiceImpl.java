@@ -32,6 +32,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public MainAccount validateAndPersistMainAccount(RegistrationInfo registrationInfo) throws InvalidPeselException, InvalidObjectException {
+        validateAccountCurrencies(registrationInfo);
         MainAccount mainAccount = createMainAndSubAccounts(registrationInfo);
         validateRegistrationInfo(mainAccount);
         mainAccountRepository.save(mainAccount);
@@ -42,11 +43,21 @@ public class AccountServiceImpl implements AccountService {
 
     private MainAccount createMainAndSubAccounts(RegistrationInfo registrationInfo) {
         MainAccount mainAccount = new MainAccount(registrationInfo.getPesel(), registrationInfo.getName(), registrationInfo.getSurname());
-        Subaccount plnSubaccount = new Subaccount(CurrencyType.PLN, registrationInfo.getInitialAmount());
+        Subaccount plnSubaccount = new Subaccount(CurrencyType.valueOf(registrationInfo.getFirstSubaccountCurrency()), registrationInfo.getInitialAmount());
         mainAccount.getSubaccounts().add(plnSubaccount);
-        Subaccount usdSubaccount = new Subaccount(CurrencyType.USD, BigDecimal.ZERO);
+        Subaccount usdSubaccount = new Subaccount(CurrencyType.valueOf(registrationInfo.getSecondSubaccountCurrency()), BigDecimal.ZERO);
         mainAccount.getSubaccounts().add(usdSubaccount);
         return mainAccount;
+    }
+
+    private void validateAccountCurrencies(RegistrationInfo registrationInfo) {
+        String firstSubaccountCurrency = registrationInfo.getFirstSubaccountCurrency();
+        String secondSubaccountCurrency = registrationInfo.getSecondSubaccountCurrency();
+        CurrencyType firstCurrency = CurrencyType.valueOf(firstSubaccountCurrency);
+        CurrencyType secondCurrency = CurrencyType.valueOf(secondSubaccountCurrency);
+        if (firstCurrency.equals(secondCurrency)) {
+            throw new IllegalArgumentException("Typy walut na kontach muszą być różne");
+        }
     }
 
     private void validateRegistrationInfo(MainAccount mainAccount) throws InvalidPeselException, InvalidObjectException {
